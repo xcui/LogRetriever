@@ -2,9 +2,8 @@ package com.example.logretriever.service;
 
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,22 +24,44 @@ public class LogService {
             final Path filePath,
             final int numberOfLines,
             final String filter) throws IOException {
+        if (numberOfLines < 0) {
+            throw new IllegalArgumentException("Number of lines must be non-negative");
+        }
+
         final List<String> logEntries = new ArrayList<>();
+        try (RandomAccessFile file = new RandomAccessFile(filePath.toFile(), "r")) {
+            final long fileLength = file.length();
+            if (fileLength == 0) {
+                return logEntries; // Return empty list if the file is empty
+            }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath.toFile()))) {
-            final List<String> lines = reader.lines().toList();
+            final StringBuilder sb = new StringBuilder();
+            long pointer = fileLength - 1;
+            int lineCount = 0;
 
-            int count = 0;
-            for (int i = lines.size() - 1; i >= 0; i--) {
-                final String line = lines.get(i);
+            file.seek(pointer);
+            for (pointer = fileLength - 1; pointer >= 0; pointer--) {
+                file.seek(pointer);
+                int readByte = file.read();
+                if (readByte == '\n' || pointer == 0) { // Handle the first line of file correctly
+                    if (!sb.isEmpty() || pointer == 0) {
+                        if (pointer == 0) {
+                            sb.append((char) readByte);
+                        }
+                        sb.reverse();
+                        final String line = sb.toString();
+                        sb.setLength(0);
 
-                if (filter == null || line.contains(filter)) {
-                    logEntries.add(line);
-                    count++;
-                }
-
-                if (numberOfLines > 0 && count >= numberOfLines) {
-                    break;
+                        if (filter == null || line.contains(filter)) {
+                            logEntries.add(line);
+                            lineCount++;
+                        }
+                        if (numberOfLines > 0 && lineCount >= numberOfLines) {
+                            break;
+                        }
+                    }
+                } else {
+                    sb.append((char) readByte);
                 }
             }
         }

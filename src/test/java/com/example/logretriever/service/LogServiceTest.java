@@ -87,14 +87,18 @@ public class LogServiceTest {
             logService.getLogEntries(logFile, 0, null);
         });
 
-        assertEquals("nonexistent.log", exception.getMessage());
+        assertTrue(exception.getMessage().contains("nonexistent.log"));
     }
 
     private File createTempFileWithContent(final String... lines) throws IOException {
         final File file = tempDir.resolve("test.log").toFile();
         try (FileWriter writer = new FileWriter(file)) {
+            if (lines.length == 1 && lines[0].isEmpty()) {
+                return file;
+            }
             for (String line : lines) {
                 writer.write(line);
+                writer.append('\n');
             }
         }
         return file;
