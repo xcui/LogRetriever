@@ -21,7 +21,6 @@ public class LogService {
      * @return list of log lines
      * @throws IOException
      */
-    // TODO add support for number of read lines and text/keyword matches
     public List<String> getLogEntries(
             final Path filePath,
             final int numberOfLines,

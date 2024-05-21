@@ -29,7 +29,6 @@ public class LogController {
      * @return list of log lines
      * @throws IOException
      */
-    // TODO add support for number of read lines and text/keyword matches
     @GetMapping("/logs")
     public List<String> getLogs(
             @RequestParam final String filename,
