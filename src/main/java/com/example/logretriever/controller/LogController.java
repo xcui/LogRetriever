@@ -31,7 +31,10 @@ public class LogController {
      */
     // TODO add support for number of read lines and text/keyword matches
     @GetMapping("/logs")
-    public List<String> getLogs(@RequestParam String filename) throws IOException {
-        return logService.getLogEntries(Paths.get(LOG_PATH, filename));
+    public List<String> getLogs(
+            @RequestParam final String filename,
+            @RequestParam(defaultValue = "0") final int numberOfLines,
+            @RequestParam(required = false) final String filter) throws IOException {
+        return logService.getLogEntries(Paths.get(LOG_PATH, filename), numberOfLines, filter);
     }
 }
