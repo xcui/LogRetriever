@@ -1,8 +1,8 @@
 package com.example.logretriever.controller;
 
 import com.example.logretriever.service.LogService;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,13 +15,17 @@ import java.util.List;
  * Class for log controller that routes http requests for log related APIs.
  */
 @RestController
-@AllArgsConstructor
 public class LogController {
-
-    private static final String LOG_PATH = "/var/log";
 
     @Autowired
     private LogService logService;
+
+    @Value("${log.path:/var/log}")
+    private String logPath;
+
+    public LogController(final LogService logService) {
+        this.logService = logService;
+    }
 
     /**
      * Method to handle GET requests.
@@ -34,6 +38,6 @@ public class LogController {
             @RequestParam final String filename,
             @RequestParam(defaultValue = "0") final int numberOfLines,
             @RequestParam(required = false) final String filter) throws IOException {
-        return logService.getLogEntries(Paths.get(LOG_PATH, filename), numberOfLines, filter);
+        return logService.getLogEntries(Paths.get(logPath, filename), numberOfLines, filter);
     }
 }
