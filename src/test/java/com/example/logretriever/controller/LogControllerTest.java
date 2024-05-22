@@ -34,7 +34,7 @@ public class LogControllerTest {
     void testGetLogsHappyPath() throws IOException, NoSuchFieldException, IllegalAccessException {
         final String filename = "example.log";
         final List<String> expectedLogs = List.of("log1", "log2", "log3");
-        when(logService.getLogEntries(Paths.get(getLogPath(), filename), eq(0), eq(null))).thenReturn(expectedLogs);
+        when(logService.getLogEntries(eq(Paths.get(getLogPath(), filename)), eq(0), eq(null))).thenReturn(expectedLogs);
 
         final List<String> logs = logController.getLogs(filename, 0, null);
 
