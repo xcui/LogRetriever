@@ -20,8 +20,8 @@ need to manually log into each machine and inspect log files individually.
 
 ### Clone the repository
 ```sh
-git clone https://github.com/yourusername/logretriever.git
-cd logretriever
+git clone https://github.com/xcui/LogRetriever.git
+cd LogRetriever
 ```
 
 ### Build the Docker Image
