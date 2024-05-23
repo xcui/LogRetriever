@@ -5,10 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,17 +24,24 @@ public class LogControllerTest {
 
     private LogController logController;
 
+    @Value("${log.path:/var/log}")
+    private String logPath;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws NoSuchFieldException, IllegalAccessException {
         MockitoAnnotations.openMocks(this);
         logController = new LogController(logService);
+        // Use reflection to set the private logPath field
+        Field logPathField = LogController.class.getDeclaredField("logPath");
+        logPathField.setAccessible(true);
+        logPathField.set(logController, "/var/log");
     }
 
     @Test
     void testGetLogsHappyPath() throws IOException, NoSuchFieldException, IllegalAccessException {
         final String filename = "example.log";
         final List<String> expectedLogs = List.of("log1", "log2", "log3");
-        when(logService.getLogEntries(eq(Paths.get(getLogPath(), filename)), eq(0), eq(null))).thenReturn(expectedLogs);
+        when(logService.getLogEntries(any(), eq(0), eq(null))).thenReturn(expectedLogs);
 
         final List<String> logs = logController.getLogs(filename, 0, null);
 
@@ -88,11 +95,5 @@ public class LogControllerTest {
         } catch (IOException e) {
             assertEquals("File not found", e.getMessage());
         }
-    }
-
-    private String getLogPath() throws NoSuchFieldException, IllegalAccessException {
-        final Field field = LogController.class.getDeclaredField("LOG_PATH");
-        field.setAccessible(true);
-        return (String) field.get(null);
     }
 }
